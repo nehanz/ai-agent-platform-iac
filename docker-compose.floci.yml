@@ -1,0 +1,12 @@
+services:
+  floci: 
+    image: floci/floci:latest
+    container_name: floci
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3,dynamodb,sqs,lambda,iam,kms,secretsmanager,stepfunctions,apigateway
+      - DEFAULT_REGION=us-east-1
+      - DEBUG=1
+    volumes:
+      - "./.floci-data:/tmp/floci"

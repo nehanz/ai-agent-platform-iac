@@ -95,6 +95,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "audit" {
     id     = "archive-old-audit-logs-to-glacier"
     status = "Enabled"
 
+    # Empty filter means this rule applies to ALL objects in the bucket.
+    # AWS provider v5 requires an explicit filter block even when targeting all objects.
+    filter {}
+
     transition {
       days          = var.glacier_transition_days
       storage_class = "GLACIER"

@@ -133,6 +133,32 @@ output "step_functions_state_machine_name" {
   value       = module.step_functions.state_machine_name
 }
 
+output "api_gateway_endpoint" {
+  description = "Base URL of the API Gateway for client requests"
+  value       = module.api_gateway.api_endpoint
+}
+
+output "api_gateway_id" {
+  description = "ID of the API Gateway"
+  value       = module.api_gateway.api_id
+}
+
+output "human_approvals_topic_arn" {
+  description = "ARN of the SNS topic for human approval alerts"
+  value       = module.notifications.human_approvals_topic_arn
+}
+
+output "budget_alerts_topic_arn" {
+  description = "ARN of the SNS topic for tenant budget alerts"
+  value       = module.notifications.budget_alerts_topic_arn
+}
+
+output "audit_event_bus_name" {
+  description = "Name of the EventBridge audit event bus"
+  value       = module.notifications.audit_event_bus_name
+}
+
+
 
 
 

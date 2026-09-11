@@ -229,6 +229,26 @@ module "step_functions" {
   sqs_dlq_arn        = module.agent_task_queue.dlq_arn
 }
 
+# API Gateway providing HTTP and REST ingress for client task submission and execution requests.
+module "api_gateway" {
+  source = "../../modules/ingress/api-gateway"
+
+  project_name      = var.project_name
+  environment       = var.environment
+  api_name          = "agent-gateway"
+  lambda_target_arn = module.agent_runner_lambda.function_arn
+}
+
+# Notification and event routing for human approvals, budget alarms, and audit events.
+module "notifications" {
+  source = "../../modules/messaging/notifications"
+
+  project_name = var.project_name
+  environment  = var.environment
+  kms_key_arn  = module.platform_kms.key_arn
+}
+
+
 
 
 

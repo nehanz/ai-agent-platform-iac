@@ -37,3 +37,33 @@ output "audit_bucket_arn" {
   description = "The ARN of the S3 audit bucket"
   value       = module.audit_bucket.bucket_arn
 }
+
+output "tenant_registry_table_name" {
+  description = "Name of the tenant registry DynamoDB table"
+  value       = module.tenant_registry_table.table_name
+}
+
+output "agent_sessions_table_name" {
+  description = "Name of the agent sessions DynamoDB table"
+  value       = module.agent_sessions_table.table_name
+}
+
+output "tenant_budgets_table_name" {
+  description = "Name of the tenant budgets DynamoDB table"
+  value       = module.tenant_budgets_table.table_name
+}
+
+output "agent_task_queue_url" {
+  description = "URL of the main agent task SQS FIFO queue"
+  value       = module.agent_task_queue.queue_id
+}
+
+output "agent_task_queue_arn" {
+  description = "ARN of the main agent task SQS FIFO queue"
+  value       = module.agent_task_queue.queue_arn
+}
+
+output "agent_task_dlq_arn" {
+  description = "ARN of the agent task Dead Letter Queue"
+  value       = module.agent_task_queue.dlq_arn
+}

@@ -1,4 +1,4 @@
-# 1. Platform Control-Plane KMS Key
+# Control-plane encryption key shared across platform-owned resources:
 module "platform_kms" {
   source = "../../modules/security/kms"
 
@@ -8,7 +8,7 @@ module "platform_kms" {
   description  = "KMS key for AI Agent Platform control-plane and shared telemetry"
 }
 
-# 2. Reference Tenant Key
+# Simulates a per-tenant Customer Managed Key used in local testing.
 module "tenant_ref_kms" {
   source = "../../modules/security/kms"
 
@@ -18,7 +18,7 @@ module "tenant_ref_kms" {
   description  = "Reference tenant KMS key for local validation of tenant data isolation"
 }
 
-# 3. Reference Tenant Tool Credential (Encrypted with Tenant KMS Key)
+# Simulates a tenant's external tool credential (e.g. GitHub API token).
 module "tenant_ref_tool_secret" {
   source = "../../modules/security/secrets-manager"
 
@@ -31,10 +31,7 @@ module "tenant_ref_tool_secret" {
   secret_string = "{\"api_key\":\"ghp_mock_token_for_tenant_ref\"}"
 }
 
-# 4. Immutable Audit Log Bucket (Encrypted with Platform KMS Key)
-# - All tenants write to this shared bucket using path-prefix isolation: tenants/{tenant_id}/
-# - The platform KMS key encrypts at the bucket level (SSE-KMS)
-# - Object Lock (COMPLIANCE mode) ensures tamper-proof audit trails
+# Tamper-proof audit log bucket for all AI agent activity (prompts, tool calls,
 module "audit_bucket" {
   source = "../../modules/storage/s3-audit"
 
@@ -42,6 +39,70 @@ module "audit_bucket" {
   environment                = var.environment
   project_name               = var.project_name
   kms_key_arn                = module.platform_kms.key_arn
-  object_lock_retention_days = 1   # Minimal for local testing; set 365+ for prod compliance
-  glacier_transition_days    = 30  # Transition to Glacier after 30 days
+  object_lock_retention_days = 1
+  glacier_transition_days    = 30
+}
+
+# Master record of every registered tenant: tenant_id, home region, KMS key ARN, status.
+module "tenant_registry_table" {
+  source = "../../modules/data/dynamodb"
+
+  table_name   = "tenant-registry"
+  environment  = var.environment
+  project_name = var.project_name
+  hash_key     = "tenant_id"
+  kms_key_arn  = module.platform_kms.key_arn
+
+  attributes = [
+    { name = "tenant_id", type = "S" }
+  ]
+}
+
+# Active agent conversation state per tenant. TTL auto-purges sessions after
+module "agent_sessions_table" {
+  source = "../../modules/data/dynamodb"
+
+  table_name    = "agent-sessions"
+  environment   = var.environment
+  project_name  = var.project_name
+  hash_key      = "tenant_id"
+  range_key     = "session_id"
+  kms_key_arn   = module.tenant_ref_kms.key_arn
+  ttl_attribute = "expires_at"
+
+  attributes = [
+    { name = "tenant_id",  type = "S" },
+    { name = "session_id", type = "S" }
+  ]
+}
+
+# Token consumption and cost tracking per tenant per billing period.
+module "tenant_budgets_table" {
+  source = "../../modules/data/dynamodb"
+
+  table_name   = "tenant-budgets"
+  environment  = var.environment
+  project_name = var.project_name
+  hash_key     = "tenant_id"
+  range_key    = "billing_period"
+  kms_key_arn  = module.tenant_ref_kms.key_arn
+
+  attributes = [
+    { name = "tenant_id",      type = "S" },
+    { name = "billing_period", type = "S" }
+  ]
+}
+
+# FIFO queue for dispatching agent tasks to ECS Fargate workers.
+module "agent_task_queue" {
+  source = "../../modules/messaging/sqs-fifo"
+
+  queue_name   = "agent-tasks"
+  environment  = var.environment
+  project_name = var.project_name
+  kms_key_arn  = module.platform_kms.key_arn
+
+  visibility_timeout_seconds = 300   # Must be >= agent max processing time
+  message_retention_seconds  = 86400 # Retain unprocessed messages for 24h
+  max_receive_count          = 3
 }

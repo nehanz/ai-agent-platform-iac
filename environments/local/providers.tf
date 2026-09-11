@@ -5,6 +5,14 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
+    archive = {
+      source  = "hashicorp/archive"
+      version = "~> 2.0"
+    }
   }
 }
 
@@ -19,17 +27,22 @@ provider "aws" {
 
   endpoints {
     apigateway     = "http://localhost:4566"
+    apigatewayv2   = "http://localhost:4566"
     cloudwatch     = "http://localhost:4566"
+    logs           = "http://localhost:4566"
     dynamodb       = "http://localhost:4566"
     ec2            = "http://localhost:4566"
     ecs            = "http://localhost:4566"
+    events         = "http://localhost:4566"
     iam            = "http://localhost:4566"
     kms            = "http://localhost:4566"
     lambda         = "http://localhost:4566"
     s3             = "http://localhost:4566"
     secretsmanager = "http://localhost:4566"
+    sns            = "http://localhost:4566"
     sqs            = "http://localhost:4566"
     stepfunctions  = "http://localhost:4566"
+    sts            = "http://localhost:4566"
   }
 
   default_tags {

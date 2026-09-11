@@ -38,3 +38,10 @@ terraform.rc
 # Provider lock files
 .terraform.lock.hcl
 **/.terraform.lock.hcl
+
+# Lambda package archives and build directories
+dist/
+**/dist/
+*.zip
+modules/**/src/
+

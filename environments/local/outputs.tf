@@ -123,6 +123,17 @@ output "agent_compute_security_group_id" {
   value       = module.vpc.agent_compute_security_group_id
 }
 
+output "step_functions_state_machine_arn" {
+  description = "ARN of the Step Functions agent orchestrator state machine"
+  value       = module.step_functions.state_machine_arn
+}
+
+output "step_functions_state_machine_name" {
+  description = "Name of the Step Functions agent orchestrator state machine"
+  value       = module.step_functions.state_machine_name
+}
+
+
 
 
 

@@ -218,6 +218,18 @@ module "agent_worker_ecs" {
   ]
 }
 
+# Step Functions state machine orchestrating the agent execution loop and human approval gates.
+module "step_functions" {
+  source = "../../modules/orchestration/step-functions"
+
+  project_name       = var.project_name
+  environment        = var.environment
+  state_machine_name = "agent-orchestrator"
+  lambda_runner_arn  = module.agent_runner_lambda.function_arn
+  sqs_dlq_arn        = module.agent_task_queue.dlq_arn
+}
+
+
 
 
 

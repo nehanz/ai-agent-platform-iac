@@ -155,6 +155,19 @@ module "agent_runner_lambda" {
   ]
 }
 
+# Isolated multi-AZ VPC network with public/private subnets and VPC Gateway endpoints.
+module "vpc" {
+  source = "../../modules/networking"
+
+  project_name = var.project_name
+  environment  = var.environment
+  vpc_cidr     = "10.0.0.0/16"
+
+  availability_zones   = ["us-east-1a", "us-east-1b"]
+  public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24"]
+  private_subnet_cidrs = ["10.0.10.0/24", "10.0.11.0/24"]
+}
+
 # ECS Fargate container cluster and task definitions for running long-duration agent tasks.
 module "agent_worker_ecs" {
   source = "../../modules/compute/ecs-fargate"
@@ -166,6 +179,9 @@ module "agent_worker_ecs" {
 
   cpu    = 512
   memory = 1024
+
+  subnet_ids         = module.vpc.private_subnet_ids
+  security_group_ids = [module.vpc.agent_compute_security_group_id]
 
   environment_variables = {
     ENVIRONMENT           = var.environment
@@ -201,5 +217,8 @@ module "agent_worker_ecs" {
     module.tenant_ref_kms.key_arn
   ]
 }
+
+
+
 
 

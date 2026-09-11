@@ -28,7 +28,6 @@ provider "aws" {
   endpoints {
     apigateway     = "http://localhost:4566"
     cloudwatch     = "http://localhost:4566"
-    cloudwatchlogs = "http://localhost:4566"
     logs           = "http://localhost:4566"
     dynamodb       = "http://localhost:4566"
     ec2            = "http://localhost:4566"

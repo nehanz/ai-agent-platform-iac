@@ -103,4 +103,26 @@ output "ecs_task_role_arn" {
   value       = module.agent_worker_ecs.task_role_arn
 }
 
+output "vpc_id" {
+  description = "ID of the VPC"
+  value       = module.vpc.vpc_id
+}
+
+output "public_subnet_ids" {
+  description = "List of public subnet IDs"
+  value       = module.vpc.public_subnet_ids
+}
+
+output "private_subnet_ids" {
+  description = "List of private subnet IDs where agent workers run"
+  value       = module.vpc.private_subnet_ids
+}
+
+output "agent_compute_security_group_id" {
+  description = "ID of the security group for agent workers"
+  value       = module.vpc.agent_compute_security_group_id
+}
+
+
+
 

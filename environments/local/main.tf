@@ -106,3 +106,52 @@ module "agent_task_queue" {
   message_retention_seconds  = 86400 # Retain unprocessed messages for 24h
   max_receive_count          = 3
 }
+
+# Serverless worker compute instance for running agent tasks, session management,
+# and tool credential retrieval with least-privilege IAM permissions.
+module "agent_runner_lambda" {
+  source = "../../modules/compute/lambda-pool"
+
+  function_name = "agent-runner"
+  environment   = var.environment
+  project_name  = var.project_name
+  description   = "Serverless worker for executing agent tasks and tool integrations"
+
+  memory_size = 512
+  timeout     = 60
+
+  environment_variables = {
+    ENVIRONMENT           = var.environment
+    PROJECT_NAME          = var.project_name
+    TENANT_REGISTRY_TABLE = module.tenant_registry_table.table_name
+    AGENT_SESSIONS_TABLE  = module.agent_sessions_table.table_name
+    TENANT_BUDGETS_TABLE  = module.tenant_budgets_table.table_name
+    AUDIT_BUCKET_NAME     = module.audit_bucket.bucket_name
+    TASK_QUEUE_URL        = module.agent_task_queue.queue_url
+  }
+
+  dynamodb_table_arns = [
+    module.tenant_registry_table.table_arn,
+    module.agent_sessions_table.table_arn,
+    module.tenant_budgets_table.table_arn
+  ]
+
+  sqs_queue_arns = [
+    module.agent_task_queue.queue_arn,
+    module.agent_task_queue.dlq_arn
+  ]
+
+  s3_bucket_arns = [
+    module.audit_bucket.bucket_arn
+  ]
+
+  secrets_manager_arns = [
+    module.tenant_ref_tool_secret.secret_arn
+  ]
+
+  kms_key_arns = [
+    module.platform_kms.key_arn,
+    module.tenant_ref_kms.key_arn
+  ]
+}
+

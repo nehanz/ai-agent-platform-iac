@@ -67,3 +67,19 @@ output "agent_task_dlq_arn" {
   description = "ARN of the agent task Dead Letter Queue"
   value       = module.agent_task_queue.dlq_arn
 }
+
+output "agent_runner_lambda_arn" {
+  description = "ARN of the Agent Runner Lambda function"
+  value       = module.agent_runner_lambda.function_arn
+}
+
+output "agent_runner_lambda_name" {
+  description = "Name of the Agent Runner Lambda function"
+  value       = module.agent_runner_lambda.function_name
+}
+
+output "agent_runner_lambda_role_arn" {
+  description = "ARN of the Agent Runner Lambda execution role"
+  value       = module.agent_runner_lambda.role_arn
+}
+

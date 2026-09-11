@@ -83,3 +83,24 @@ output "agent_runner_lambda_role_arn" {
   value       = module.agent_runner_lambda.role_arn
 }
 
+output "ecs_cluster_arn" {
+  description = "ARN of the ECS Cluster for agent workers"
+  value       = module.agent_worker_ecs.cluster_arn
+}
+
+output "ecs_cluster_name" {
+  description = "Name of the ECS Cluster for agent workers"
+  value       = module.agent_worker_ecs.cluster_name
+}
+
+output "ecs_task_definition_arn" {
+  description = "ARN of the ECS Task Definition for agent workers"
+  value       = module.agent_worker_ecs.task_definition_arn
+}
+
+output "ecs_task_role_arn" {
+  description = "ARN of the IAM task role for agent container workers"
+  value       = module.agent_worker_ecs.task_role_arn
+}
+
+

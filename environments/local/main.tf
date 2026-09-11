@@ -155,3 +155,51 @@ module "agent_runner_lambda" {
   ]
 }
 
+# ECS Fargate container cluster and task definitions for running long-duration agent tasks.
+module "agent_worker_ecs" {
+  source = "../../modules/compute/ecs-fargate"
+
+  cluster_name = "agent-workers"
+  service_name = "agent-worker"
+  environment  = var.environment
+  project_name = var.project_name
+
+  cpu    = 512
+  memory = 1024
+
+  environment_variables = {
+    ENVIRONMENT           = var.environment
+    PROJECT_NAME          = var.project_name
+    TENANT_REGISTRY_TABLE = module.tenant_registry_table.table_name
+    AGENT_SESSIONS_TABLE  = module.agent_sessions_table.table_name
+    TENANT_BUDGETS_TABLE  = module.tenant_budgets_table.table_name
+    AUDIT_BUCKET_NAME     = module.audit_bucket.bucket_name
+    TASK_QUEUE_URL        = module.agent_task_queue.queue_url
+  }
+
+  dynamodb_table_arns = [
+    module.tenant_registry_table.table_arn,
+    module.agent_sessions_table.table_arn,
+    module.tenant_budgets_table.table_arn
+  ]
+
+  sqs_queue_arns = [
+    module.agent_task_queue.queue_arn,
+    module.agent_task_queue.dlq_arn
+  ]
+
+  s3_bucket_arns = [
+    module.audit_bucket.bucket_arn
+  ]
+
+  secrets_manager_arns = [
+    module.tenant_ref_tool_secret.secret_arn
+  ]
+
+  kms_key_arns = [
+    module.platform_kms.key_arn,
+    module.tenant_ref_kms.key_arn
+  ]
+}
+
+
